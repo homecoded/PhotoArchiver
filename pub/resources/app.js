@@ -94,3 +94,59 @@ function log(msg) {
 // Event Listener für den Button
 document.getElementById('selectFolderButton').addEventListener('click', selectFolder);
 
+//////////////////////////////////
+// SETTINGS
+//////////////////////////////////
+
+function openSettings(e) {
+    e.preventDefault();
+    const popup = document.getElementById('settings-popup');
+    popup.classList.add('open');
+}
+
+function closeSettings(e) {
+    e.preventDefault();
+    const popup = document.getElementById('settings-popup');
+    popup.classList.remove('open');
+}
+
+async function checkUrl(testUrl) {
+    const response = await fetch(testUrl, { signal: AbortSignal.timeout(500) });
+    if (response.status == 200) {
+        return true;
+    }
+    return false;
+};
+
+async function searchServer() {
+
+    const protocol = document.getElementById('server-search-protocol');
+    for (let thirdOcted = 1; thirdOcted < 256; thirdOcted++) {
+        for (let fourthOcted = 1; fourthOcted < 256; fourthOcted++) {
+            let IP = '192.168.' + thirdOcted + '.' + fourthOcted;
+            const testUrl = 'https://' + IP + '/optimize.php';
+
+            protocol.innerText = 'Das wird jetzt leider etwas dauern ...\n' + 'Untersuche ' + testUrl;
+            try {
+                let result = await checkUrl(testUrl);
+                if (result) {
+                    return testUrl;
+                }
+            } catch (error) {
+                console.warn('Error testing', testUrl, error);
+            }
+        }
+    }
+}
+
+async function automateServerSetting() {
+    const protocol = document.getElementById('server-search-protocol');
+    let serverUrl = await searchServer();
+    console.log(serverUrl);
+    protocol.innerText = ' Gefunden ' + serverUrl + '!';
+    document.getElementById('server').value = serverUrl;
+}
+
+document.getElementById('settings-open').addEventListener('click', openSettings);
+document.getElementById('settings-close').addEventListener('click', closeSettings);
+document.getElementById('settings-search-server').addEventListener('click', automateServerSetting);

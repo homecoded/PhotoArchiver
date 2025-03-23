@@ -12,6 +12,10 @@ h1 {
     background: #ffffff;
 }
 
+h2 {
+    margin-bottom: 20px;
+}
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f9;
@@ -59,3 +63,80 @@ button:hover {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
+.settings {
+    display: block;
+    position: fixed;
+    bottom: 0px;
+    right: 5px;
+    text-align: center;
+    width: 50px;
+    height: 70px;
+    vertical-align: center;
+}
+
+.settings a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 3rem;
+}
+
+.settings a:hover {
+    font-size: 3.2rem;
+}
+
+body {
+    position: relative;
+}
+
+.settings-popup {
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    padding: 50px 20px 20px 20px;
+    font-size: 1.3rem;
+    display: none;
+}
+
+.settings-popup input {
+    font-size: 1.3rem;
+}
+
+.settings-popup .settings-close {
+    display: block;
+    position: fixed;
+    top: 0px;
+    right: 5px;
+    text-align: center;
+    width: 50px;
+    height: 70px;
+    vertical-align: center;
+}
+
+.settings-popup .settings-close a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 3rem;
+}
+
+.settings-popup a {
+    font-size: 1rem;
+}
+
+.settings-popup .settings-close a:hover {
+    font-size: 3.2rem;
+}
+
+.settings-popup #server-search-protocol {
+    font-size: 0.8rem;
+}
+
+.open {
+    display: block;
+}
+
+
