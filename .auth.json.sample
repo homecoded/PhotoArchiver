@@ -1,0 +1,9 @@
+{
+    "users": {
+         "test": {
+            "password": "$2y$10$gHjFw15ttNvSmp6w5YozTe1lA4RedLUhe88SG3OKoA\/5YL\/d9osZC",
+            "salt": "99e0d8d138e90ca2",
+            "token": "67e1bd2b211a63.62233160"
+        }
+    }
+}
