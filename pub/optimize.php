@@ -4,6 +4,8 @@ header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 header('Content-Type: application/json; charset=utf-8');
 
+include '../library/sessionHandling.php';
+
 $uploadDir = 'uploads/';
 $optimizedDir = 'optimized/';
 $backupTarget = 'backup/Media/Bilder/Manuel Handy/PhotoArchiver/';
@@ -18,6 +20,11 @@ function correctImageOrientation($filename): void
             $orientation = $exif['Orientation'];
             if ($orientation != 1) {
                 $img = imagecreatefromjpeg($filename);
+                if (!$img) {
+                    echo json_encode(['error' => 'Fehler bei der Ausrichtungskorrektur: ' . $filename]);
+                    exit();
+                }
+
                 $deg = 0;
                 switch ($orientation) {
                     case 3:
@@ -52,8 +59,8 @@ function resizeImage($file, $w, $h): void
     }
 
     $src = imagecreatefromjpeg($file);
-    $dst = imagecreatetruecolor($newWidth, $newHeight);
-    imagecopyresampled($dst, $src, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+    $dst = imagecreatetruecolor((int) $newWidth, (int) $newHeight);
+    imagecopyresampled($dst, $src, 0, 0, 0, 0, (int) $newWidth, (int) $newHeight, (int) $width, (int) $height);
     imagejpeg($dst, $file);
 }
 
@@ -75,10 +82,119 @@ function getOptimizedPath($file): string
     return $optimizedDir . implode('.', $parts);
 }
 
+function getUserFolder(): string {
+    $xtoken = $_POST['xtoken'] ?? '';
+    if (empty($xtoken)) {
+        echo json_encode(['error' => 'Ungültige Nutzerkennung.']);
+        exit();
+    }
+
+    $userFolder = $xtoken . DIRECTORY_SEPARATOR;
+
+    $folder = $_POST['folder'] ?? '';
+    if (!empty($folder)) {
+        $userFolder .= $folder . DIRECTORY_SEPARATOR;
+    }
+
+    return $userFolder;
+}
+
+function getDateFolder($path): string
+{
+    $exif = exif_read_data($path, null, true);
+    $fileDatePath = '';
+    if (isset($exif['EXIF']['DateTimeOriginal'])) {
+        $dateTimeOriginal = $exif['EXIF']['DateTimeOriginal'];
+        $parts = explode(':', $dateTimeOriginal);
+        $fileDatePath = $parts[0] . DIRECTORY_SEPARATOR . $parts[1] . DIRECTORY_SEPARATOR;
+    }
+    if (empty($fileDatePath)) {
+        $matches = [[]];
+        preg_match_all('/\d{8}/', $path, $matches);
+        if (count($matches[0]) > 0) {
+            $dateString = $matches[0][0];
+            $year = substr($dateString, 0, 4);
+            $month = substr($dateString, 4, 2);
+            $fileDatePath = $year . DIRECTORY_SEPARATOR . $month . DIRECTORY_SEPARATOR;
+        }
+    }
+
+    if (empty($fileDatePath)) {
+        $fileDatePath = 'Unbekanntes_Erstellungsdatum' . DIRECTORY_SEPARATOR;
+    }
+
+    return $fileDatePath;
+}
+
+function sanitizePath(string $inputPath, string $baseDir): string
+{
+    $sanitizedPath = realpath($baseDir . DIRECTORY_SEPARATOR . $inputPath);
+
+    if ($sanitizedPath === false) {
+        echo json_encode(['error' => 'Ungültiger Pfad']);
+        exit();
+    }
+
+    // Check if the sanitized path is within the allowed directory
+    if (strpos($sanitizedPath, $baseDir) !== 0) {
+        echo json_encode(['error' => 'Pfad außerhalb des gültigen Bereichs']);
+        exit();
+    }
+    return $sanitizedPath . DIRECTORY_SEPARATOR;
+}
+
+function validateFileUpload($filePath, $size): bool
+{
+    $allowedTypes = ['image/jpeg'];
+    $fileType = mime_content_type($filePath);
+
+    if (!in_array($fileType, $allowedTypes)) {
+        echo json_encode(['error' => 'Ungültiger Dateityp']);
+        exit();
+    }
+
+    if ($size > 25 * 1024 * 1024) {
+        echo json_encode(['error' => 'Datei ist zu groß (> 25MB)']);
+        exit();
+    }
+
+    $imageInfo = getimagesize($filePath);
+    if (!$imageInfo || $imageInfo[2] !== IMAGETYPE_JPEG) {
+        echo json_encode(['error' => 'Ungültige Bilddatei']);
+        exit();
+    }
+
+    return true;
+}
+
+// check if user is allowed
+$xtoken = $_POST['xtoken'] ?? '';
+$isUserAllowed = false;
+if (!empty($xtoken)) {
+    $authFilePath = __DIR__ . '/../.auth.json';
+    if (file_exists($authFilePath)) {
+        $string = file_get_contents($authFilePath);
+        $authData = json_decode($string, true);
+        foreach (($authData['users'] ?? []) as $user) {
+            if ($xtoken === $user['token']) {
+                $isUserAllowed = true;
+            }
+        }
+    }
+}
+
+if (!$isUserAllowed) {
+    http_response_code(401);
+    echo "Unauthorized";
+    exit();
+}
+
+$uploadDir = sanitizePath($uploadDir, __DIR__);
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true);
 }
 
+$optimizedDir = sanitizePath($optimizedDir, __DIR__);
 if (!is_dir($optimizedDir)) {
     mkdir($optimizedDir, 0755, true);
 }
@@ -89,20 +205,39 @@ if (isset($_FILES['files'])) {
     $files = $_FILES['files'];
 
     foreach ($files['name'] as $index => $fileName) {
-        $targetPath = $uploadDir . $files['full_path'][$index];
-        if (!is_dir(dirname($targetPath))) {
-            mkdir(dirname($targetPath), 0755, true);
+        $fileFullPath = $files['full_path'][$index];
+        $targetPath = dirname($uploadDir . $fileFullPath);
+        $targetFile = basename($fileFullPath);
+        $targetPath = realpath($targetPath);
+        if (!$targetFile) {
+            echo json_encode(['error' => 'Ungültiges Zielverzeichnis: ' . $targetPath]);
+            exit();
         }
 
-        if (move_uploaded_file($files['tmp_name'][$index], $targetPath)) {
-            $optimizedPath = getOptimizedPath($files['full_path'][$index]);
+        if (!is_dir($targetPath)) {
+            mkdir($targetPath, 0755, true);
+        }
+
+        $validExtensions = ['jpg', 'jpeg'];
+        $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+        if (!in_array($fileExt, $validExtensions)) {
+            echo json_encode(['error' => 'Ungültiges Dateiformat: ' . $fileName]);
+            exit();
+        }
+
+        validateFileUpload($files['tmp_name'][$index], $files['size'][$index]);
+
+        if (move_uploaded_file($files['tmp_name'][$index], $targetPath . DIRECTORY_SEPARATOR . $targetFile)) {
+            $optimizedPath = getOptimizedPath($targetFile);
 
             if (!is_dir(dirname($optimizedPath))) {
                 mkdir(dirname($optimizedPath), 0755, true);
             }
-            copy($targetPath, $optimizedPath);
+            copy($targetPath . DIRECTORY_SEPARATOR . $targetFile, $optimizedPath);
 
-            $backupFilePath = $backupTarget . $files['full_path'][$index];
+            // no sanitation as the backup folder can be outside the project
+            $backupFilePath = $backupTarget . getUserFolder() . getDateFolder($targetPath) . $fileFullPath;
+
             if (!is_dir(dirname($backupFilePath))) {
                 mkdir(dirname($backupFilePath), 0755, true);
             }
@@ -128,6 +263,7 @@ if (isset($_FILES['files'])) {
 
             if ($fileSizeOriginal < $fileSizeOptimized) {
                 $bestFile = $targetPath;
+                $fileSizeOptimized = $fileSizeOriginal;
             }
 
             $optimizedFiles[] = [
@@ -138,6 +274,8 @@ if (isset($_FILES['files'])) {
                 'optimizedImage' => base64_encode(file_get_contents($bestFile))
             ];
             unlink($targetPath);
+        } else {
+            echo json_encode(['error' => 'Das Hochladen der Datei wurde abgelehnt.']);
         }
     }
 }

@@ -5,7 +5,7 @@
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     margin-left: -20px;
     margin-right: -20px;
     padding: 20px;
@@ -32,8 +32,9 @@ body {
 
 form {
     position: relative;
+    max-width: 800px;
+    display: inline-block;
 }
-
 
 .form-row {
     margin-bottom: 15px;
@@ -41,20 +42,20 @@ form {
 }
 
 label {
-    width: 50%;
     font-size: 1.2rem;
-    display: inline-block;
-    text-align: right;
-    padding-right: 15px;
+    display: block;
 }
 
-input[type=text] {
+input[type=text],
+input[type=password] {
     padding: 10px;
-    width: 50%;
+    width: 100%;
     font-size: 1.2rem;
+    min-width: 350px;
 }
 
-input[type=text]:focus {
+input[type=text]:focus,
+input[type=password]:focus {
     outline: 3px solid #3700B3;
 }
 
@@ -69,7 +70,7 @@ input[type=text]:focus {
 }
 
 button {
-    background-color: #6200EE;
+    background-color: #132f61;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -81,7 +82,7 @@ button {
 }
 
 button:hover {
-    background-color: #3700B3;
+    background-color: #3e64b0;
 }
 
 #folderList {
@@ -172,6 +173,43 @@ body {
     display: block;
 }
 
+.data-center {
+    background: #ffffff;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 40px;
+    display: none;
+}
+
+.data-center .table-label {
+    font-weight: bold;
+}
+
+.progressbar {
+    width: 100%;
+    position: relative;
+    background: #ccc;
+    padding: 2px;
+    height: 20px;
+    border: 2px solid #555;
+    margin-top: 30px;
+}
+
+.progressbar .bar {
+    height: 100%;
+    background: #3e64b0;
+    width: 0%;
+    -webkit-transition: width 1s ease-in-out;
+    -moz-transition: width 1s ease-in-out;
+    -o-transition: width 1s ease-in-out;
+    transition: width 1s ease-in-out;
+}
+
+.warn {
+    font-weight: bold;
+    color: #640606;
+}
 
 
 

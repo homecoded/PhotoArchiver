@@ -1,0 +1,4 @@
+pub/backup
+pub/optimized
+pub/uploads
+.auth.json

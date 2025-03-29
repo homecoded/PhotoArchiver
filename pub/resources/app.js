@@ -1,26 +1,52 @@
 let sumOriginalData = 0;
 let sumOptimizedData = 0;
+let permission;
 
-// Funktion zum Auswählen und Anzeigen der Dateien eines Ordners
 async function selectFolder() {
-    const folderHandle = await window.showDirectoryPicker(); // Nutzer wählt Ordner aus
+    const folderHandle = await window.showDirectoryPicker();
+    permission = await folderHandle.requestPermission({mode: "readwrite"});
 
-    // Berechtigung zum Lesen + Schreiben anfordern
-    const permission = await folderHandle.requestPermission({mode: "readwrite"});
+    const files = [];
+
+    document.getElementById('selectFolderButton').setAttribute("disabled", "disabled");
 
     for await (const [name, handle] of folderHandle.entries()) {
         if (handle.kind === "file") {
             if (name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".jpeg")) {
                 if (!name.includes('.optimized')) {
-                    await uploadFileToServer(handle, folderHandle);
+                    files.push(handle);
                 }
             }
         }
     }
-    log('&nbsp;');
-    log('Originale Daten: ' + sumOriginalData + ' Megabytes');
-    log('Optimierte Daten: ' + sumOptimizedData + ' Megabytes');
-    log('Ersparnis: <strong>' + (100 - sumOptimizedData / sumOriginalData * 100).toFixed(1) + '%</strong>');
+
+    if (files.length > 0) {
+        logDataCenter('numfiles', files.length);
+        let filesDone = 0;
+        for (const file of files) {
+            logDataCenter('currentfile', file.name);
+            await uploadFileToServer(file, folderHandle);
+            logDataCenter('numfilesdone', ++filesDone);
+            setProgressBar(Math.round(filesDone / files.length * 100));
+        }
+    } else {
+        warn('Tut mir leid. Ich habe in dem Ordner "' + folderHandle.name + '" keine Dateien zum Optimieren gefunden!');
+    }
+
+    document.getElementById('selectFolderButton').removeAttribute("disabled");
+}
+
+function warn(msg) {
+    document.getElementById('warn').innerHTML = msg;
+}
+
+function logDataCenter(type, data) {
+    document.getElementById('data-center').style.display = 'block';
+    document.getElementById('stat-' + type).innerHTML = data;
+}
+
+function setProgressBar(percent) {
+    document.getElementById('progressbar-indicator').style.width = percent + '%';
 }
 
 async function saveBase64FileToFolder(folderHandle, base64Data, fileName) {
@@ -31,9 +57,9 @@ async function saveBase64FileToFolder(folderHandle, base64Data, fileName) {
         for (let i = 0; i < byteCharacters.length; i++) {
             byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-        const blob = new Blob([byteNumbers], { type: 'image/jpeg' });
+        const blob = new Blob([byteNumbers], {type: 'image/jpeg'});
 
-        const fileHandle = await folderHandle.getFileHandle(fileName, { create: true });
+        const fileHandle = await folderHandle.getFileHandle(fileName, {create: true});
         const writable = await fileHandle.createWritable();
         await writable.write(blob);
         await writable.close();
@@ -56,6 +82,9 @@ async function deleteFile(fileHandle) {
 async function uploadFileToServer(file, folderHandle) {
     const formData = new FormData();
     formData.append('files[]', await file.getFile());
+    formData.append('xtoken', localStorage.getItem('xtoken'));
+    formData.append('folder', folderHandle.name);
+    formData.append('csrf_token', csrf_token);
 
     try {
         const response = await fetch('optimize.php', {
@@ -67,9 +96,12 @@ async function uploadFileToServer(file, folderHandle) {
         if (response.ok) {
             if (Array.isArray(result)) {
                 for (const fileData of result) {
-                    log(fileData['originalFile']);
                     sumOriginalData += fileData['originalSize'];
                     sumOptimizedData += fileData['optimizedSize'];
+                    let savedPercent = 100 - (sumOptimizedData * 100 / sumOriginalData);
+                    logDataCenter('sizebackup', sumOriginalData.toFixed(2));
+                    logDataCenter('sizeoptimized', sumOptimizedData.toFixed(2));
+                    logDataCenter('savedPercent', savedPercent.toFixed(2));
                     await saveBase64FileToFolder(folderHandle, fileData['optimizedImage'], fileData['optimizedFile'].split('/').pop());
                     await deleteFile(file);
                 }
@@ -83,70 +115,4 @@ async function uploadFileToServer(file, folderHandle) {
     }
 }
 
-// Funktion zum Aktualisieren der Dateiliste in der Anzeige
-function log(msg) {
-    const folderList = document.getElementById('protocol');
-    const fileItem = document.createElement('div');
-    fileItem.innerHTML = msg;
-    folderList.appendChild(fileItem);
-}
-
-// Event Listener für den Button
 document.getElementById('selectFolderButton').addEventListener('click', selectFolder);
-
-//////////////////////////////////
-// SETTINGS
-//////////////////////////////////
-
-function openSettings(e) {
-    e.preventDefault();
-    const popup = document.getElementById('settings-popup');
-    popup.classList.add('open');
-}
-
-function closeSettings(e) {
-    e.preventDefault();
-    const popup = document.getElementById('settings-popup');
-    popup.classList.remove('open');
-}
-
-async function checkUrl(testUrl) {
-    const response = await fetch(testUrl, { signal: AbortSignal.timeout(500) });
-    if (response.status == 200) {
-        return true;
-    }
-    return false;
-};
-
-async function searchServer() {
-
-    const protocol = document.getElementById('server-search-protocol');
-    for (let thirdOcted = 1; thirdOcted < 256; thirdOcted++) {
-        for (let fourthOcted = 1; fourthOcted < 256; fourthOcted++) {
-            let IP = '192.168.' + thirdOcted + '.' + fourthOcted;
-            const testUrl = 'https://' + IP + '/optimize.php';
-
-            protocol.innerText = 'Das wird jetzt leider etwas dauern ...\n' + 'Untersuche ' + testUrl;
-            try {
-                let result = await checkUrl(testUrl);
-                if (result) {
-                    return testUrl;
-                }
-            } catch (error) {
-                console.warn('Error testing', testUrl, error);
-            }
-        }
-    }
-}
-
-async function automateServerSetting() {
-    const protocol = document.getElementById('server-search-protocol');
-    let serverUrl = await searchServer();
-    console.log(serverUrl);
-    protocol.innerText = ' Gefunden ' + serverUrl + '!';
-    document.getElementById('server').value = serverUrl;
-}
-
-document.getElementById('settings-open').addEventListener('click', openSettings);
-document.getElementById('settings-close').addEventListener('click', closeSettings);
-document.getElementById('settings-search-server').addEventListener('click', automateServerSetting);

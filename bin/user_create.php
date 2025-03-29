@@ -35,9 +35,8 @@ if (!isset($newUserData['username']) || !isset($newUserData['password'])) {
 
 $salt = bin2hex(random_bytes(8));
 $userAuth = [
-    'password' => sha1($newUserData['password'].$salt),
-    'salt' => $salt,
-    'token' => uniqid('', true)
+    'password' => password_hash($newUserData['password'], PASSWORD_DEFAULT),
+    'token' => bin2hex(random_bytes(24))
 ];
 
 $authData['users'][$newUserData['username']] = $userAuth;
