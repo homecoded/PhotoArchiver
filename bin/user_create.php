@@ -33,7 +33,6 @@ if (!isset($newUserData['username']) || !isset($newUserData['password'])) {
     exit(2);
 }
 
-$salt = bin2hex(random_bytes(8));
 $userAuth = [
     'password' => password_hash($newUserData['password'], PASSWORD_DEFAULT),
     'token' => bin2hex(random_bytes(24))

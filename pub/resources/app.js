@@ -9,6 +9,8 @@ async function selectFolder() {
     const files = [];
 
     document.getElementById('selectFolderButton').setAttribute("disabled", "disabled");
+    setProgressBar(0);
+    resetError();
 
     for await (const [name, handle] of folderHandle.entries()) {
         if (handle.kind === "file") {
@@ -30,14 +32,14 @@ async function selectFolder() {
             setProgressBar(Math.round(filesDone / files.length * 100));
         }
     } else {
-        warn('Tut mir leid. Ich habe in dem Ordner "' + folderHandle.name + '" keine Dateien zum Optimieren gefunden!');
+        logError('Tut mir leid. Ich habe in dem Ordner keine Dateien zum Optimieren gefunden!', folderHandle.name);
     }
 
     document.getElementById('selectFolderButton').removeAttribute("disabled");
 }
 
-function warn(msg) {
-    document.getElementById('warn').innerHTML = msg;
+function resetError() {
+    document.getElementById('warn').innerHTML = "";
 }
 
 function logDataCenter(type, data) {
@@ -47,6 +49,13 @@ function logDataCenter(type, data) {
 
 function setProgressBar(percent) {
     document.getElementById('progressbar-indicator').style.width = percent + '%';
+}
+
+function logError(msg, subject) {
+    const error = document.createElement('div');
+    error.classList.add('error');
+    error.innerHTML = 'Fehler: (' + subject + ') ' + msg;
+    document.getElementById('warn').append(error);
 }
 
 async function saveBase64FileToFolder(folderHandle, base64Data, fileName) {
@@ -106,12 +115,17 @@ async function uploadFileToServer(file, folderHandle) {
                     await deleteFile(file);
                 }
             }
+            if (result instanceof Object) {
+                if (result.error) {
+                    logError(result.error, file.name);
+                }
+            }
         } else {
-            console.error('Fehler beim Hochladen:', response.statusText);
+            logError("Fehler beim Hochladen der Datei. Datei wurde nicht optimiert.", file.name);
         }
 
     } catch (error) {
-        console.error('Fehler beim Hochladen der Dateien:', error);
+        logError("Fehler beim Hochladen der Datei. Datei wurde nicht optimiert.", file.name);
     }
 }
 

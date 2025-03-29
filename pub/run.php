@@ -1,5 +1,7 @@
 <?php
 include '../library/sessionHandling.php';
+global $nonce;
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline';");
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -24,19 +26,19 @@ include '../library/sessionHandling.php';
     <table>
         <tr>
             <td><span class="table-label">Aktuelle Datei:</span></td>
-            <td><span class="tabel-data" id="stat-currentfile">keine</span></td>
+            <td><span class="table-data" id="stat-currentfile">keine</span></td>
         </tr>
         <tr>
             <td><span class="table-label">Dateien (ingesamt):</span></td>
-            <td><span class="tabel-data" id="stat-numfiles">0</span></td>
+            <td><span class="table-data" id="stat-numfiles">0</span></td>
         </tr>
         <tr>
             <td><span class="table-label">Dateien (bearbeitet):</span></td>
-            <td><span class="tabel-data" id="stat-numfilesdone">0</span></td>
+            <td><span class="table-data" id="stat-numfilesdone">0</span></td>
         </tr>
         <tr>
             <td><span class="table-label">Backupgröße:</span></td>
-            <td><span class="tabel-data" id="stat-sizebackup">0</span> MB</td>
+            <td><span class="table-data" id="stat-sizebackup">0</span> MB</td>
         </tr>
         <tr>
             <td><span class="table-label">Optimierte Größe:</span></td>
@@ -44,7 +46,7 @@ include '../library/sessionHandling.php';
         </tr>
         <tr>
             <td><span class="table-label">Datenmenge (Anteil eingespart):</span></td>
-            <td><span class="tabel-data" id="stat-savedPercent">0</span>%</td>
+            <td><span class="table-data" id="stat-savedPercent">0</span>%</td>
         </tr>
     </table>
 
@@ -55,7 +57,7 @@ include '../library/sessionHandling.php';
 
 <div class="warn" id="warn"></div>
 
-<script>
+<script nonce="<?= $nonce ?>">
     let csrf_token = '<?php echo $_SESSION['csrf_token']; ?>';
 </script>
 <script src="resources/app.js"></script>

@@ -2,6 +2,8 @@
 declare(strict_types=1);
 include '../library/sessionHandling.php';
 include '../library/rateLimiter.php';
+global $nonce;
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline';");
 ?>
 
 <!DOCTYPE html>
@@ -68,7 +70,7 @@ session_regenerate_id(true);
     Wir loggen Dich ein
 </h1>
 
-<script>
+<script nonce="<?= $nonce ?>">
     const xtoken = <?= json_encode($token['xtoken'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     localStorage.setItem("xtoken", xtoken);
     window.location.href = "run.php";

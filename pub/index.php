@@ -1,8 +1,9 @@
 <?php
 include '../library/sessionHandling.php';
+global $nonce;
 
 header("X-Frame-Options: DENY");
-header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';");
+header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline';");
 header("X-Content-Type-Options: nosniff");
 header("Referrer-Policy: no-referrer");
 ?>
@@ -39,6 +40,13 @@ header("Referrer-Policy: no-referrer");
         <button id="login" type="submit">Einloggen</button>
     </form>
 </div>
+
+<script nonce="<?= $nonce ?>">
+    const xToken = localStorage.getItem("xtoken");
+    if (xToken.length > 20) {
+        window.location.href = 'run.php';
+    }
+</script>
 
 </body>
 </html>
