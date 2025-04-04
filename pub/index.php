@@ -24,18 +24,22 @@ header("Referrer-Policy: no-referrer");
 <h1>
     Wir machen den Speicher wieder groß!
 </h1>
-<div class="center">
-    <p>Bitte logge Dich ein, um zu beginnen.</p>
+<div class="login-box center">
+    <p>
+        <strong>
+            Bitte logge Dich ein, um zu beginnen.
+        </strong>
+    </p>
 
     <form action="login.php" method="POST">
         <div class="form-row">
             <label for="username">Dein Nutzername:</label>
-            <input name="username" type="text" required>
+            <input name="username" type="text" required autocomplete="username">
         </div>
         <div class="form-row">
             <label for="password">Dein Passwort:</label>
             <input name="password" type="password" autocomplete="off" required>
-            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="csrf_token" autocomplete="off" value="<?php echo $_SESSION['csrf_token']; ?>">
         </div>
         <button id="login" type="submit">Einloggen</button>
     </form>

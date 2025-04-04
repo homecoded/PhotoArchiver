@@ -23,8 +23,6 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$n
 $username = $_POST['username'];
 $password = $_POST['password'];
 
-rate_limiter('login' . $username, 10,60);
-
 $authFilePath = __DIR__ . '/../.auth.json';
 if (file_exists($authFilePath)) {
     $string = file_get_contents($authFilePath);
@@ -55,6 +53,7 @@ if (password_verify($password, $storedHash)) {
         'xtoken' => $authUserData['token'],
     ];
 } else {
+    rate_limiter('login' . $username, 10,60);
     sleep(2 + rand(1, 5));
     http_response_code(401);
     echo '<h1>Login fehlgeschlagen</h1>';
@@ -62,7 +61,6 @@ if (password_verify($password, $storedHash)) {
     echo '</body></html>';
     exit();
 }
-
 session_regenerate_id(true);
 ?>
 

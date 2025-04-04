@@ -6,9 +6,9 @@ header('Content-Type: application/json; charset=utf-8');
 
 include '../library/sessionHandling.php';
 
-$uploadDir = 'uploads/';
-$optimizedDir = 'optimized/';
-$backupTarget = 'backup/Media/Bilder/Manuel Handy/PhotoArchiver/';
+$uploadDir = 'data/uploads/';
+$optimizedDir = 'data/optimized/';
+$backupTarget = 'data/backup/';
 
 const MAX_SIDE_LENGTH = 2000;
 
@@ -151,6 +151,8 @@ function sanitizePath(string $inputPath, string $baseDir): string
         exit();
     }
 
+    $inputPath = str_replace(DIRECTORY_SEPARATOR.DIRECTORY_SEPARATOR,DIRECTORY_SEPARATOR, $inputPath);
+
     if (substr($inputPath, -1) !== DIRECTORY_SEPARATOR) {
         $inputPath .= DIRECTORY_SEPARATOR;
     }
@@ -161,7 +163,12 @@ function sanitizePath(string $inputPath, string $baseDir): string
 function validateFileUpload($filePath, $size): bool
 {
     $allowedTypes = ['image/jpeg'];
-    $fileType = mime_content_type($filePath);
+    if (!empty($filePath)) {
+        $fileType = mime_content_type($filePath);
+    } else {
+        $fileType = 'unknown';
+    }
+
 
     if (!in_array($fileType, $allowedTypes)) {
         echo json_encode(['error' => 'Ungültiger Dateityp']);
@@ -170,6 +177,11 @@ function validateFileUpload($filePath, $size): bool
 
     if ($size > 25 * 1024 * 1024) {
         echo json_encode(['error' => 'Datei ist zu groß (> 25MB)']);
+        exit();
+    }
+
+    if ($size <= 0) {
+        echo json_encode(['error' => 'Datei ist zu klein (0MB)']);
         exit();
     }
 
@@ -221,17 +233,18 @@ if (isset($_FILES['files'])) {
 
     foreach ($files['name'] as $index => $fileName) {
         $fileFullPath = $files['full_path'][$index];
-        $targetPath = dirname(getcwd() . DIRECTORY_SEPARATOR . $uploadDir
+        $targetPath = dirname($uploadDir
             . getUserFolder() . $fileFullPath) . DIRECTORY_SEPARATOR;
         $targetFile = basename($fileFullPath);
         sanitizePath($targetPath, __DIR__);
 
-        if (!$targetFile) {
+        if (!$targetPath) {
             echo json_encode(['error' => 'Ungültiges Zielverzeichnis: ' . $targetPath]);
             exit();
         }
 
         if (!is_dir($targetPath)) {
+            echo "targetPath $targetPath \n";
             mkdir($targetPath, 0755, true);
         }
 
@@ -242,9 +255,10 @@ if (isset($_FILES['files'])) {
             exit();
         }
 
-        validateFileUpload($files['tmp_name'][$index], $files['size'][$index]);
+        $tempfile = $files['tmp_name'][$index];
+        validateFileUpload($tempfile, $files['size'][$index] ?? 0);
 
-        if (move_uploaded_file($files['tmp_name'][$index], $targetPath . DIRECTORY_SEPARATOR . $targetFile)) {
+        if (move_uploaded_file($tempfile, $targetPath . $targetFile)) {
             $optimizedPath = getcwd() . DIRECTORY_SEPARATOR . getOptimizedPath($targetFile);
             sanitizePath($optimizedPath, __DIR__);
 

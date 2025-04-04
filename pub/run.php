@@ -2,6 +2,9 @@
 include '../library/sessionHandling.php';
 global $nonce;
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline';");
+
+
+
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -12,10 +15,19 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$n
     <link rel="stylesheet" href="resources/styles.css">
 </head>
 <body>
+<p>
+    <strong>Photo Archivist</strong>
+</p>
 <h1>
     Wir machen den Speicher wieder groß!
 </h1>
-<p>Drücke auf Start um mit dem Scan zu beginnen!</p>
+<p class="info-box">
+    Drücke auf Start um ein Verzeichnis mit Fotos auszuwählen! <br/>
+    Alle Fotos werden danach verkleinert und auf dem Gerät
+    gespeichert.<br/>
+    Die Originalbilder werden im Online-Backup-Speicher abgelegt, den Du regelmäßig leeren musst. Bevor
+    dein Speicher voll ist, sagen wir Dir Bescheid.
+</p>
 
 <div class="center">
     <button id="selectFolderButton">Start</button>
@@ -46,7 +58,7 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$n
         </tr>
         <tr>
             <td><span class="table-label">Datenmenge (Anteil eingespart):</span></td>
-            <td><span class="table-data" id="stat-savedPercent">0</span>%</td>
+            <td><span class="table-data" id="stat-savedPercent">0</span></td>
         </tr>
     </table>
 
@@ -63,3 +75,4 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$n
 <script src="resources/app.js"></script>
 </body>
 </html>
+

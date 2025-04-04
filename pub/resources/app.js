@@ -110,7 +110,8 @@ async function uploadFileToServer(file, folderHandle) {
                     let savedPercent = 100 - (sumOptimizedData * 100 / sumOriginalData);
                     logDataCenter('sizebackup', sumOriginalData.toFixed(2));
                     logDataCenter('sizeoptimized', sumOptimizedData.toFixed(2));
-                    logDataCenter('savedPercent', savedPercent.toFixed(2));
+                    logDataCenter('savedPercent', savedPercent.toFixed(2)
+                        + '% (' + (sumOriginalData - sumOptimizedData).toFixed(2) + 'MB frei geworden)');
                     await saveBase64FileToFolder(folderHandle, fileData['optimizedImage'], fileData['optimizedFile'].split('/').pop());
                     await deleteFile(file);
                 }

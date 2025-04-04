@@ -9,7 +9,8 @@ h1 {
     margin-left: -20px;
     margin-right: -20px;
     padding: 20px;
-    background: #ffffff;
+    background: #f1ecd2;
+    color: #3f3d3d;
 }
 
 h2 {
@@ -18,16 +19,32 @@ h2 {
 
 p {
     margin-bottom: 15px;
+    text-shadow: 0px 0px 5px #000;
+}
+
+.info-box {
+    padding: 2rem;
+    background: rgba(63,61,61,0.4);
+    box-shadow: 0 0 10px #3f3d3d;
+    border-radius: 1rem;
 }
 
 body {
     font-family: Arial, sans-serif;
     font-size: 1.2rem;
-    background-color: #f4f4f9;
+    background-color: #3f3d3d;
     padding: 20px;
     background-image: url('background.jpg');
     background-repeat: no-repeat;
-    background-size: 100vw 100vh;
+    background-position: center;
+    background-attachment: fixed;
+    webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height:100%;
+    width:100%;
+    color: #ffffff;
 }
 
 form {
@@ -44,6 +61,7 @@ form {
 label {
     font-size: 1.2rem;
     display: block;
+    margin-bottom: 10px;
 }
 
 input[type=text],
@@ -51,7 +69,7 @@ input[type=password] {
     padding: 10px;
     width: 100%;
     font-size: 1.2rem;
-    min-width: 350px;
+    min-width: 33vw;
 }
 
 input[type=text]:focus,
@@ -69,20 +87,33 @@ input[type=password]:focus {
     text-align: center;
 }
 
+.login-box {
+    border: 2px solid #3f3d3d;
+    background: rgba(63,61,61,.7);
+    padding: 40px;
+}
+
 button {
-    background-color: #132f61;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+    background-color: #edd04e;
+    color: #212119;
+    padding: 1rem 2rem;
+    border: 2px solid #212119;
+    border-radius: 0.2rem;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 1.5rem;
     margin-top: 20px;
     margin-bottom: 20px;
+    font-weight: lighter;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 button:hover {
-    background-color: #3e64b0;
+    background-color: #f3e29e;
+    color: #212119;
+    border-color: #f1ecd2;
+    letter-spacing: 3px;
+    font-weight: bold;
 }
 
 #folderList {
@@ -174,13 +205,14 @@ body {
 }
 
 .data-center {
-    background: #ffffff;
+    background: #f1ecd2;
     padding: 30px;
     border: 1px solid #ccc;
     border-radius: 5px;
     margin-bottom: 40px;
     display: none;
     font-size: 1rem;
+    color: #3f3d3d;
 }
 
 .data-center .table-label {
@@ -195,17 +227,19 @@ body {
 .progressbar {
     width: 100%;
     position: relative;
-    background: #ccc;
-    padding: 2px;
-    height: 20px;
+    background: #fff;
+    padding: 0.2rem;
+    height: 2rem;
     border: 2px solid #555;
     margin-top: 30px;
+    border-radius: 9px;
 }
 
 .progressbar .bar {
     height: 100%;
-    background: #3e64b0;
+    background: #3f3d3d;
     width: 0%;
+    border-radius: 6px;
     -webkit-transition: width 1s ease-in-out;
     -moz-transition: width 1s ease-in-out;
     -o-transition: width 1s ease-in-out;
@@ -214,7 +248,11 @@ body {
 
 .warn {
     font-weight: bold;
-    color: #640606;
+    color: #f81515;
+    padding: 2rem;
+    background: rgba(63,61,61,0.4);
+    box-shadow: 0 0 10px #3f3d3d;
+    border-radius: 1rem;
 }
 
 
