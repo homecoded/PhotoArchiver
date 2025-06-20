@@ -5,20 +5,76 @@
 }
 
 h1 {
-    margin-bottom: 20px;
+    margin-bottom: 40px;
     margin-left: -20px;
     margin-right: -20px;
     padding: 20px;
-    background: #ffffff;
+    background: #f1ecd2;
+    color: #3f3d3d;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+p {
+    margin-bottom: 15px;
+    text-shadow: 0px 0px 5px #000;
+}
+
+.info-box {
+    padding: 2rem;
+    background: rgba(63,61,61,0.4);
+    box-shadow: 0 0 10px #3f3d3d;
+    border-radius: 1rem;
 }
 
 body {
     font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
+    font-size: 1.2rem;
+    background-color: #3f3d3d;
     padding: 20px;
     background-image: url('background.jpg');
     background-repeat: no-repeat;
-    background-size: 100vw 100vh;
+    background-position: center;
+    background-attachment: fixed;
+    webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    height:100%;
+    width:100%;
+    color: #ffffff;
+}
+
+form {
+    position: relative;
+    max-width: 800px;
+    display: inline-block;
+}
+
+.form-row {
+    margin-bottom: 15px;
+    font-size: 0;
+}
+
+label {
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+input[type=text],
+input[type=password] {
+    padding: 10px;
+    width: 100%;
+    font-size: 1.2rem;
+    min-width: 33vw;
+}
+
+input[type=text]:focus,
+input[type=password]:focus {
+    outline: 3px solid #3700B3;
 }
 
 .container {
@@ -31,20 +87,33 @@ body {
     text-align: center;
 }
 
+.login-box {
+    border: 2px solid #3f3d3d;
+    background: rgba(63,61,61,.7);
+    padding: 40px;
+}
+
 button {
-    background-color: #6200EE;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+    background-color: #edd04e;
+    color: #212119;
+    padding: 1rem 2rem;
+    border: 2px solid #212119;
+    border-radius: 0.2rem;
     cursor: pointer;
-    font-size: 20px;
+    font-size: 1.5rem;
     margin-top: 20px;
     margin-bottom: 20px;
+    font-weight: lighter;
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 button:hover {
-    background-color: #3700B3;
+    background-color: #f3e29e;
+    color: #212119;
+    border-color: #f1ecd2;
+    letter-spacing: 3px;
+    font-weight: bold;
 }
 
 #folderList {
@@ -59,3 +128,132 @@ button:hover {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
+
+.settings {
+    display: block;
+    position: fixed;
+    bottom: 0px;
+    right: 5px;
+    text-align: center;
+    width: 50px;
+    height: 70px;
+    vertical-align: center;
+}
+
+.settings a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 3rem;
+}
+
+.settings a:hover {
+    font-size: 3.2rem;
+}
+
+body {
+    position: relative;
+}
+
+.settings-popup {
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #ffffff;
+    padding: 50px 20px 20px 20px;
+    font-size: 1.3rem;
+    display: none;
+}
+
+.settings-popup input {
+    font-size: 1.3rem;
+}
+
+.settings-popup .settings-close {
+    display: block;
+    position: fixed;
+    top: 0px;
+    right: 5px;
+    text-align: center;
+    width: 50px;
+    height: 70px;
+    vertical-align: center;
+}
+
+.settings-popup .settings-close a {
+    text-decoration: none;
+    color: #000000;
+    font-size: 3rem;
+}
+
+.settings-popup a {
+    font-size: 1rem;
+}
+
+.settings-popup .settings-close a:hover {
+    font-size: 3.2rem;
+}
+
+.settings-popup #server-search-protocol {
+    font-size: 0.8rem;
+}
+
+.open {
+    display: block;
+}
+
+.data-center {
+    background: #f1ecd2;
+    padding: 30px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 40px;
+    display: none;
+    font-size: 1rem;
+    color: #3f3d3d;
+}
+
+.data-center .table-label {
+    font-weight: bold;
+}
+
+.data-center .table-data {
+    word-wrap: anywhere;
+    overflow-wrap: anywhere;
+}
+
+.progressbar {
+    width: 100%;
+    position: relative;
+    background: #fff;
+    padding: 0.2rem;
+    height: 2rem;
+    border: 2px solid #555;
+    margin-top: 30px;
+    border-radius: 9px;
+}
+
+.progressbar .bar {
+    height: 100%;
+    background: #3f3d3d;
+    width: 0%;
+    border-radius: 6px;
+    -webkit-transition: width 1s ease-in-out;
+    -moz-transition: width 1s ease-in-out;
+    -o-transition: width 1s ease-in-out;
+    transition: width 1s ease-in-out;
+}
+
+.warn {
+    font-weight: bold;
+    color: #f81515;
+    padding: 2rem;
+    background: rgba(63,61,61,0.4);
+    box-shadow: 0 0 10px #3f3d3d;
+    border-radius: 1rem;
+}
+
+
+
