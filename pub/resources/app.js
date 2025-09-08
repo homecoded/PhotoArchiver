@@ -1,6 +1,22 @@
 let sumOriginalData = 0;
 let sumOptimizedData = 0;
 let permission;
+let wakeLock = null;
+
+async function requestWakeLock() {
+    try {
+        wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {
+        console.error('Wake lock failed:', err);
+    }
+}
+
+function releaseWakeLock() {
+    if (wakeLock) {
+        wakeLock.release();
+        wakeLock = null;
+    }
+}
 
 async function selectFolder() {
     const folderHandle = await window.showDirectoryPicker();
@@ -9,8 +25,11 @@ async function selectFolder() {
     const files = [];
 
     document.getElementById('selectFolderButton').setAttribute("disabled", "disabled");
+    document.getElementById('info-box').style.display = 'none';
+
     setProgressBar(0);
     resetError();
+    await requestWakeLock();
 
     for await (const [name, handle] of folderHandle.entries()) {
         if (handle.kind === "file") {
@@ -24,18 +43,33 @@ async function selectFolder() {
 
     if (files.length > 0) {
         logDataCenter('numfiles', files.length);
+
+        // Process files in parallel batches
+        const BATCH_SIZE = 3; // Upload 3 files simultaneously
         let filesDone = 0;
-        for (const file of files) {
-            logDataCenter('currentfile', file.name);
-            await uploadFileToServer(file, folderHandle);
-            logDataCenter('numfilesdone', ++filesDone);
-            setProgressBar(Math.round(filesDone / files.length * 100));
+
+        for (let i = 0; i < files.length; i += BATCH_SIZE) {
+            const batch = files.slice(i, i + BATCH_SIZE);
+
+            // Process this batch in parallel
+            const batchPromises = batch.map(async (file) => {
+                logDataCenter('currentfile', file.name);
+                await uploadFileToServer(file, folderHandle);
+                filesDone++;
+                logDataCenter('numfilesdone', filesDone);
+                setProgressBar(Math.round(filesDone / files.length * 100));
+            });
+
+            // Wait for all files in this batch to complete
+            await Promise.all(batchPromises);
         }
     } else {
         logError('Tut mir leid. Ich habe in dem Ordner keine Dateien zum Optimieren gefunden!', folderHandle.name);
     }
 
+    releaseWakeLock();
     document.getElementById('selectFolderButton').removeAttribute("disabled");
+    document.getElementById('info-box').style.display = 'block';
 }
 
 function resetError() {
@@ -131,3 +165,4 @@ async function uploadFileToServer(file, folderHandle) {
 }
 
 document.getElementById('selectFolderButton').addEventListener('click', selectFolder);
+

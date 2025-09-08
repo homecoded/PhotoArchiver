@@ -1,9 +1,8 @@
 <?php
 declare(strict_types=1);
-
 if (!isset($argv[1])) {
     echo "Please specify username and password\n";
-    echo "./bin/user_create.php user=username password=password\n";
+    echo "./bin/user_create.php username=username password=password\n";
     exit(2);
 }
 
@@ -29,7 +28,7 @@ foreach ($argv as $arg) {
 
 if (!isset($newUserData['username']) || !isset($newUserData['password'])) {
     echo "Please specify username and password\n";
-    echo "./bin/user_create.php user=username password=password\n";
+    echo "./bin/user_create.php username=username password=password\n";
     exit(2);
 }
 

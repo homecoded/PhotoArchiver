@@ -2,9 +2,6 @@
 include '../library/sessionHandling.php';
 global $nonce;
 header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$nonce'; style-src 'self' 'unsafe-inline';");
-
-
-
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -21,7 +18,7 @@ header("Content-Security-Policy: default-src 'self'; script-src 'self' 'nonce-$n
 <h1>
     Wir machen den Speicher wieder groß!
 </h1>
-<p class="info-box">
+<p class="info-box" id="info-box">
     Drücke auf Start um ein Verzeichnis mit Fotos auszuwählen! <br/>
     Alle Fotos werden danach verkleinert und auf dem Gerät
     gespeichert.<br/>
