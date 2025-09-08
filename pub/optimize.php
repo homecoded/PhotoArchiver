@@ -120,7 +120,8 @@ function getDateFolder($path): string
     }
     if (empty($fileDatePath)) {
         $matches = [[]];
-        preg_match_all('/\d{8}/', $path, $matches);
+        $file = basename($path);
+        preg_match_all('/\d{8}/', $file, $matches);
         if (count($matches[0]) > 0) {
             $dateString = $matches[0][0];
             $year = substr($dateString, 0, 4);

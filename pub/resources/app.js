@@ -6,7 +6,6 @@ let wakeLock = null;
 async function requestWakeLock() {
     try {
         wakeLock = await navigator.wakeLock.request('screen');
-        console.log('Wake lock active');
     } catch (err) {
         console.error('Wake lock failed:', err);
     }
@@ -26,6 +25,8 @@ async function selectFolder() {
     const files = [];
 
     document.getElementById('selectFolderButton').setAttribute("disabled", "disabled");
+    document.getElementById('info-box').style.display = 'none';
+
     setProgressBar(0);
     resetError();
     await requestWakeLock();
@@ -68,6 +69,7 @@ async function selectFolder() {
 
     releaseWakeLock();
     document.getElementById('selectFolderButton').removeAttribute("disabled");
+    document.getElementById('info-box').style.display = 'block';
 }
 
 function resetError() {
