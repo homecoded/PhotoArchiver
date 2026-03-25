@@ -146,8 +146,44 @@ async function uploadFileToServer(file, folderHandle) {
                     logDataCenter('sizeoptimized', sumOptimizedData.toFixed(2));
                     logDataCenter('savedPercent', savedPercent.toFixed(2)
                         + '% (' + (sumOriginalData - sumOptimizedData).toFixed(2) + 'MB frei geworden)');
-                    await saveBase64FileToFolder(folderHandle, fileData['optimizedImage'], fileData['optimizedFile'].split('/').pop());
                     await deleteFile(file);
+                    await saveBase64FileToFolder(folderHandle, fileData['optimizedImage'], fileData['optimizedFile']);
+
+                    if (fileData['optimizedImage'] && fileData['optimizedImage'].length > 0) {
+                        const optimizedFileName = fileData['optimizedFile'];
+                        const originalName = optimizedFileName.replace('.optimized', '');
+
+                        try {
+                            // 1. Get a handle to the newly saved .optimized file and verify it
+                            const optimizedFileHandle = await folderHandle.getFileHandle(optimizedFileName);
+                            const optimizedFile = await optimizedFileHandle.getFile();
+
+                            if (optimizedFile.size === 0) {
+                                throw new Error(`Optimized file "${optimizedFileName}" is empty — aborting rename.`);
+                            }
+
+                            // 2. Read its content
+                            const fileBuffer = await optimizedFile.arrayBuffer();
+
+                            // 3. Write content under the original filename (creates or overwrites)
+                            const originalFileHandle = await folderHandle.getFileHandle(originalName, { create: true });
+                            const writable = await originalFileHandle.createWritable();
+                            await writable.write(fileBuffer);
+                            await writable.close();
+
+                            // 4. Verify the renamed file also has content before deleting the temp file
+                            const renamedFile = await (await folderHandle.getFileHandle(originalName)).getFile();
+                            if (renamedFile.size === 0) {
+                                throw new Error(`Renamed file "${originalName}" is empty — keeping .optimized file as backup.`);
+                            }
+
+                            // 5. Only now delete the temporary .optimized file
+                            await folderHandle.removeEntry(optimizedFileName);
+                        } catch (renameError) {
+                            // Non-fatal: the .optimized file is still there as a backup
+                            logError(`Could not overwrite original file: ${renameError.message}`, optimizedFileName);
+                        }
+                    }
                 }
             }
             if (result instanceof Object) {

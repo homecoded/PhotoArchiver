@@ -68,7 +68,7 @@ function copyExifData($originalFile, $optimizedFile): void
 {
     $originalFile = escapeshellarg($originalFile);
     $optimizedFile = escapeshellarg($optimizedFile);
-    shell_exec("exiftool -tagsfromfile $originalFile -exif:all --subifd:all $optimizedFile");
+    shell_exec("exiftool -tagsfromfile $originalFile -exif:all --subifd:all -Orientation= $optimizedFile");
 }
 
 function getOptimizedPath($file): string
@@ -260,7 +260,10 @@ if (isset($_FILES['files'])) {
         validateFileUpload($tempfile, $files['size'][$index] ?? 0);
 
         if (move_uploaded_file($tempfile, $targetPath . $targetFile)) {
-            $optimizedPath = getcwd() . DIRECTORY_SEPARATOR . getOptimizedPath($targetFile);
+            $optimizedPath = getOptimizedPath($targetFile);
+            if (!str_starts_with($optimizedPath, getcwd())) {
+                $optimizedPath = getcwd() . DIRECTORY_SEPARATOR . getOptimizedPath($targetFile);
+            }
             sanitizePath($optimizedPath, __DIR__);
 
             if (!is_dir(dirname($optimizedPath))) {
@@ -301,9 +304,11 @@ if (isset($_FILES['files'])) {
                 $fileSizeOptimized = $fileSizeOriginal;
             }
 
+            $optimizedFileName = basename($optimizedPath);
+
             $optimizedFiles[] = [
                 'originalFile' => $files['full_path'][$index],
-                'optimizedFile' => $optimizedPath,
+                'optimizedFile' => $optimizedFileName,
                 'originalSize' => $fileSizeOriginal,
                 'optimizedSize' => $fileSizeOptimized,
                 'optimizedImage' => base64_encode(file_get_contents($bestFile))
