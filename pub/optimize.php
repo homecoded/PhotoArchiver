@@ -170,7 +170,6 @@ function validateFileUpload($filePath, $size): bool
         $fileType = 'unknown';
     }
 
-
     if (!in_array($fileType, $allowedTypes)) {
         echo json_encode(['error' => 'Ungültiger Dateityp']);
         exit();
@@ -258,6 +257,20 @@ if (isset($_FILES['files'])) {
 
         $tempfile = $files['tmp_name'][$index];
         validateFileUpload($tempfile, $files['size'][$index] ?? 0);
+
+        $imageInfo = getimagesize($tempfile);
+        $longestSide = max($imageInfo[0], $imageInfo[1]);
+
+        if ($longestSide <= MAX_SIDE_LENGTH) {
+            $optimizedFiles[] = [
+                'originalFile' => $files['full_path'][$index],
+                'optimizedFile' => $targetFile,
+                'originalSize' => 0,
+                'optimizedSize' => 0,
+                'optimizedImage' => ''
+            ];
+            continue;
+        }
 
         if (move_uploaded_file($tempfile, $targetPath . $targetFile)) {
             $optimizedPath = getOptimizedPath($targetFile);

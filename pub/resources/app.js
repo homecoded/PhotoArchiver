@@ -139,6 +139,10 @@ async function uploadFileToServer(file, folderHandle) {
         if (response.ok) {
             if (Array.isArray(result)) {
                 for (const fileData of result) {
+                    if (fileData['optimizedSize'] >= fileData['originalSize']) {
+                        continue;
+                    }
+
                     sumOriginalData += fileData['originalSize'];
                     sumOptimizedData += fileData['optimizedSize'];
                     let savedPercent = 100 - (sumOptimizedData * 100 / sumOriginalData);
@@ -146,10 +150,11 @@ async function uploadFileToServer(file, folderHandle) {
                     logDataCenter('sizeoptimized', sumOptimizedData.toFixed(2));
                     logDataCenter('savedPercent', savedPercent.toFixed(2)
                         + '% (' + (sumOriginalData - sumOptimizedData).toFixed(2) + 'MB frei geworden)');
-                    await deleteFile(file);
-                    await saveBase64FileToFolder(folderHandle, fileData['optimizedImage'], fileData['optimizedFile']);
 
                     if (fileData['optimizedImage'] && fileData['optimizedImage'].length > 0) {
+                        await saveBase64FileToFolder(folderHandle, fileData['optimizedImage'], fileData['optimizedFile']);
+                        await deleteFile(file);
+
                         const optimizedFileName = fileData['optimizedFile'];
                         const originalName = optimizedFileName.replace('.optimized', '');
 
